@@ -55,8 +55,8 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
             # Instead we've created a comment on Github.
             self.send_response(201)
             self.end_headers()
-        except:
-            print('Something gone wrong')
+        except Exception as error:
+            print('Something gone wrong:\n{}'.format(str(error)))
             self.send_response(500)
             self.end_headers()
 
