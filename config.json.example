@@ -4,6 +4,6 @@
     "module": "<module-folder>",
     "auth": {
         "username": "<username>",
-        "password": "<password>",
+        "password": "<password>"
     } 
 }
