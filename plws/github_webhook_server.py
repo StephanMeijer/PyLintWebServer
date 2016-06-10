@@ -1,55 +1,57 @@
-from http.server import BaseHTTPRequestHandler
-from github import Github
+""" Github webhook server
+
+@author: Stephan Meijer & Gijsbert ter Horst
+"""
+
 import json
 import os
 import shutil
+from http.server import BaseHTTPRequestHandler
+from github import Github
 
 from git_handler import GitHandler
 from pylint_runner import lint_to_text
 
+
 class GithubWebHookServer(BaseHTTPRequestHandler):
+    """ Handles a request that passes a pull request.
+    Clones the commit of the pull request.
+    Runs the code through pylint
+    Comments on the pull-request with the results."""
+
     def __init__(self, *args, **kwargs):
-        super(GithubWebHookServer,self).__init__(*args, **kwargs)
+        super(GithubWebHookServer, self).__init__(*args, **kwargs)
         with open('config.json') as configfile:
             self.config = json.load(configfile)
 
-
     def do_POST(self):
-
+        """ Reply to an HTTP POST """
         if not self.__authenticate():
             self.send_response(403)
             self.end_headers()
             return
-
         # Send response 202 Accepted
         # We've accepted the request and are processing it.
         self.send_response(202)
-
-
         try:
-            length = int(self.headers['Content-Length'])
-            post_data = json.loads(self.rfile.read(length).decode('utf-8'))
-
+            post_data = json.loads(
+                self.rfile.read(
+                    int(self.headers['Content-Length'])).decode('utf-8'))
             if post_data["action"] != "opened":
                 # Pull Request is no longer open.
                 # Reply with HTTP 409 Conflict
                 self.send_response(409)
                 self.end_headers()
                 return
-
-            number = post_data["number"]
-
-            clone_url = post_data["pull_request"]["head"]["repo"]["clone_url"]
-            [repo_owner, repo_name] = post_data["pull_request"]["head"]["repo"]["full_name"].split('/')
-            branch = post_data["pull_request"]["head"]["ref"]
-            commit = post_data["pull_request"]["head"]["sha"]
-
-            handler = GitHandler(clone_url, branch, commit)
+            handler = GitHandler(
+                clone_url=post_data["pull_request"]["head"]["repo"]["clone_url"],
+                branch=post_data["pull_request"]["head"]["ref"],
+                commit=post_data["pull_request"]["head"]["sha"])
             handler.clone()
-
-            path = handler.getPath()
-
-            self.__githubRespond(path, number, repo_owner, repo_name)
+            self.__pylint_and_comment(
+                path=handler.getPath(),
+                number=post_data["number"],
+                fullname=post_data["pull_request"]["head"]["repo"]["full_name"])
             # Reply 201 Created, we're not using 200 OK
             # because in that case we would have to send the result of
             # processing as a reply.
@@ -62,14 +64,18 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
             self.end_headers()
 
 
-    def __githubRespond(self, path, number, repo_owner, repo_name):
+    def __pylint_and_comment(self, path, number, fullname):
+        """ Run the cloned repo through pylint, and comment on the PR with
+            the results """
+        [repo_owner, repo_name] = fullname.split('/')
         path = os.path.join(path, self.config['module'])
-        text = lint_to_text(path)
-
         gihu = Github(self.config['auth']['username'], self.config['auth']['password'])
-
-        gihu.get_user(repo_owner).get_repo(repo_name).get_issue(number).create_comment("**pylint results:**\n\n```\n{0}\n```".format(text))
-
+        gihu.get_user(
+            repo_owner).get_repo(
+                repo_name).get_issue(
+                    number).create_comment(
+                        "**pylint results:**\n\n```\n{0}\n```".format(
+                            lint_to_text(path)))
         shutil.rmtree(path, ignore_errors=True)
 
     def __authenticate(self):
