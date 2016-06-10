@@ -13,4 +13,4 @@ def lint_to_text(paths):
     pylint_output = WritableObject()
     for path in paths:
         lint.Run(path, reporter=TextReporter(pylint_output), exit=False)
-    return "".join(pylint_output.read())
+    return ''.join(pylint_output.read())
