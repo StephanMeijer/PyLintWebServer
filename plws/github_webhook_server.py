@@ -5,7 +5,7 @@
 
 import json
 from http.server import BaseHTTPRequestHandler
-from .git_handler import GitHandler
+from git_handler import GitHandler
 
 
 class GithubWebHookServer(BaseHTTPRequestHandler):

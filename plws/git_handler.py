@@ -3,7 +3,7 @@ import shutil
 import tempfile
 from git import Repo, Git
 from github import Github
-from .pylint_runner import lint_to_text
+from pylint_runner import lint_to_text
 
 def getTempFolder():
     tmp = os.path.join(tempfile.gettempdir(), str(os.times()[-1]))
