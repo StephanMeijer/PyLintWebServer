@@ -15,8 +15,9 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
 
 
     def do_POST(self):
-        self.send_response(200)
-        self.end_headers()
+        # Send response 202 Accepted
+        # We've accepted the request and are processing it.
+        self.send_response(202)
 
         # TODO: authentication
 
@@ -39,8 +40,17 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
             path = handler.getPath()
 
             self.__githubRespond(path, number, repo_owner, repo_name)
+            # Reply 201 Created, we're not using 200 OK
+            # because in that case we would have to send the result of
+            # processing as a reply.
+            # Instead we've created a comment on Github.
+            self.send_response(201)
+            self.end_headers()
         except:
             print("Something gone wrong")
+            self.send_response(500)
+            self.end_headers()
+
 
     def __githubRespond(self, path, number, repo_owner, repo_name):
         path = os.path.join(path, self.config['module'])
