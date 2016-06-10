@@ -25,7 +25,7 @@ class GitHandler(object):
         os.makedirs(tmp)
         return tmp
 
-    def __pylint_and_comment(self, number, fullname):
+    def pylint_and_comment(self, number, fullname):
         """ Run the cloned repo through pylint, and comment on the PR with
         the results """
         [repo_owner, repo_name] = self.repo['full_name'].split('/')
