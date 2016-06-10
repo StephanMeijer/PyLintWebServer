@@ -5,7 +5,7 @@
 
 import json
 from http.server import BaseHTTPRequestHandler
-from git_handler import GitHandler
+from .git_handler import GitHandler
 
 
 class GithubWebHookServer(BaseHTTPRequestHandler):
@@ -38,7 +38,7 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
                 self.send_response(409)
                 self.end_headers()
                 return
-            handler = GitHandler(post_data, self.config['module'])
+            handler = GitHandler(post_data)
             handler.clone()
             handler.pylint_and_comment(self.config)
             # Reply 201 Created, we're not using 200 OK
