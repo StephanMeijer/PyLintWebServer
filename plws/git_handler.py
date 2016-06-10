@@ -29,7 +29,7 @@ class GitHandler(object):
         the results """
         [repo_owner, repo_name] = self.__repo['full_name'].split('/')
         with open(os.path.join(self.__path, 'pylint_modules.txt'),'r') as modulefile:
-            paths = [os.path.join(self.__path, module.strip()) for module in list(modulefile)]
+            paths = [os.path.join(self.__path, module.strip()) for module in modulefile.readlines()]
         gihu = Github(config['auth']['username'],
                       config['auth']['password'])
         gihu.get_user(
