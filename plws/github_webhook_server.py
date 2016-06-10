@@ -15,11 +15,16 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
 
 
     def do_POST(self):
+
+        if not self.__authenticate():
+            self.send_response(403)
+            self.end_headers()
+            return
+
         # Send response 202 Accepted
         # We've accepted the request and are processing it.
         self.send_response(202)
 
-        # TODO: authentication
 
         try:
             length = int(self.headers['Content-Length'])
@@ -61,3 +66,7 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
         gihu.get_user(repo_owner).get_repo(repo_name).get_issue(number).create_comment("**pylint results:**\n\n```\n{0}\n```".format(text))
 
         shutil.rmtree(path, ignore_errors=True)
+
+    def __authenticate(self):
+        #TODO: Implement
+        return True
