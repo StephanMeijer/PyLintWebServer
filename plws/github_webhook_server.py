@@ -32,7 +32,7 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
             post_data = json.loads(
                 self.rfile.read(
                     int(self.headers['Content-Length'])).decode('utf-8'))
-            if post_data['action'] != 'opened':
+            if post_data['action'] not in ('opened', 'synchronize'):
                 # Pull Request is no longer open.
                 # Reply with HTTP 409 Conflict
                 self.send_response(409)
