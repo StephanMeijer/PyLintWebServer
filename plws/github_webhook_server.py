@@ -38,16 +38,9 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
                 self.send_response(409)
                 self.end_headers()
                 return
-            handler = GitHandler(
-                number=post_data['number'],
-                repo=post_data['pull_request']['head']['repo'],
-                branch=post_data['pull_request']['head']['ref'],
-                commit=post_data['pull_request']['head']['sha'],
-                module=self.config['module'])
+            handler = GitHandler(post_data, self.config['module'])
             handler.clone()
-            handler.pylint_and_comment(
-                number=post_data['number'],
-                fullname=post_data['pull_request']['head']['repo']['full_name'])
+            handler.pylint_and_comment(self.config)
             # Reply 201 Created, we're not using 200 OK
             # because in that case we would have to send the result of
             # processing as a reply.
