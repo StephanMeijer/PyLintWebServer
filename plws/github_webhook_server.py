@@ -4,13 +4,8 @@
 """
 
 import json
-import os
-import shutil
 from http.server import BaseHTTPRequestHandler
-from github import Github
-
 from git_handler import GitHandler
-from pylint_runner import lint_to_text
 
 
 class GithubWebHookServer(BaseHTTPRequestHandler):
@@ -44,9 +39,11 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
             handler = GitHandler(
-                clone_url=post_data['pull_request']['head']['repo']['clone_url'],
+                number=post_data['number'],
+                repo=post_data['pull_request']['head']['repo'],
                 branch=post_data['pull_request']['head']['ref'],
-                commit=post_data['pull_request']['head']['sha'])
+                commit=post_data['pull_request']['head']['sha'],
+                module=self.config['module'])
             handler.clone()
             self.__pylint_and_comment(
                 path=handler.getPath(),
@@ -62,21 +59,6 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
             print('Something gone wrong')
             self.send_response(500)
             self.end_headers()
-
-
-    def __pylint_and_comment(self, path, number, fullname):
-        """ Run the cloned repo through pylint, and comment on the PR with
-            the results """
-        [repo_owner, repo_name] = fullname.split('/')
-        path = os.path.join(path, self.config['module'])
-        gihu = Github(self.config['auth']['username'], self.config['auth']['password'])
-        gihu.get_user(
-            repo_owner).get_repo(
-                repo_name).get_issue(
-                    number).create_comment(
-                        '**pylint results:**\n\n```\n{0}\n```'.format(
-                            lint_to_text(path)))
-        shutil.rmtree(path, ignore_errors=True)
 
     def __authenticate(self):
         #TODO: Implement
