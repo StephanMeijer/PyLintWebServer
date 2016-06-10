@@ -46,7 +46,6 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
                 module=self.config['module'])
             handler.clone()
             handler.pylint_and_comment(
-                path=handler.getPath(),
                 number=post_data['number'],
                 fullname=post_data['pull_request']['head']['repo']['full_name'])
             # Reply 201 Created, we're not using 200 OK
