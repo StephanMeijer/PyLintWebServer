@@ -3,7 +3,7 @@ import shutil
 import tempfile
 from git import Repo, Git
 from github import Github
-from pylint_runner import lint_to_text
+from .pylint_runner import lint_to_text
 
 def getTempFolder():
     tmp = os.path.join(tempfile.gettempdir(), str(os.times()[-1]))
@@ -11,13 +11,12 @@ def getTempFolder():
     return tmp
 
 class GitHandler(object):
-    def __init__(self, data, module):
+    def __init__(self, data):
         self.__number = data['number'],
         self.__repo = data['pull_request']['head']['repo']
         self.__branch = data['pull_request']['head']['ref']
         self.__commit = data['pull_request']['head']['sha']
         self.__path = None
-        self.__module = module
 
     def clone(self):
         self.__path = getTempFolder()
@@ -29,7 +28,8 @@ class GitHandler(object):
         """ Run the cloned repo through pylint, and comment on the PR with
         the results """
         [repo_owner, repo_name] = self.__repo['full_name'].split('/')
-        path = os.path.join(self.__path, config['module'])
+        with open(os.path.join(self.__path, 'pylint_modules.txt')) as modulefile:
+            paths = os.path.join(self.__path, list(modulefile))
         gihu = Github(config['auth']['username'],
                       config['auth']['password'])
         gihu.get_user(
@@ -37,5 +37,5 @@ class GitHandler(object):
                 repo_name).get_issue(
                     self.__number).create_comment(
                         '**pylint results:**\n\n```\n{0}\n```'.format(
-                            lint_to_text(path)))
-        shutil.rmtree(path, ignore_errors=True)
+                            lint_to_text(paths)))
+        shutil.rmtree(self.__path, ignore_errors=True)
