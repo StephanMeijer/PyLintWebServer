@@ -13,8 +13,8 @@ def getTempFolder():
 class GitHandler(object):
     def __init__(self, data, module):
         self.__number = data['number'],
-        self.__repo = data['pull_request']['head']['repo'],
-        self.__branch = data['pull_request']['head']['ref'],
+        self.__repo = data['pull_request']['head']['repo']
+        self.__branch = data['pull_request']['head']['ref']
         self.__commit = data['pull_request']['head']['sha']
         self.__path = None
         self.__module = module
