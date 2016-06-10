@@ -1,6 +1,5 @@
 from http.server import BaseHTTPRequestHandler
 from github import Github
-import urllib
 import json
 import os
 import shutil
