@@ -1,9 +1,8 @@
 {
     "hostName": "0.0.0.0",
     "hostPort": 1234,
-    "module": "<module-folder>",
     "auth": {
         "username": "<username>",
-        "password": "<password>",
+        "password": "<password>"
     } 
 }
