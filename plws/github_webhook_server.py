@@ -7,9 +7,13 @@ import shutil
 from git_handler import GitHandler
 from pylint_runner import lint_to_text
 
-config = json.load(open('config.json')) # Ugly
-
 class GithubWebHookServer(BaseHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super(GithubWebHookServer,self).__init__(*args, **kwargs)
+        with open('config.json') as configfile:
+            self.config = json.load(configfile)
+
+
     def do_POST(self):
         self.send_response(200)
         self.end_headers()
@@ -39,10 +43,10 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
             print("Something gone wrong")
 
     def __githubRespond(self, path, number, repo_owner, repo_name):
-        path = os.path.join(path, config['module'])
+        path = os.path.join(path, self.config['module'])
         text = lint_to_text(path)
 
-        gihu = Github(config['auth']['username'], config['auth']['password'])
+        gihu = Github(self.config['auth']['username'], self.config['auth']['password'])
 
         gihu.get_user(repo_owner).get_repo(repo_name).get_issue(number).create_comment("**pylint results:**\n\n```\n{0}\n```".format(text))
 
