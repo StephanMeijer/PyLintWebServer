@@ -28,8 +28,8 @@ class GitHandler(object):
         """ Run the cloned repo through pylint, and comment on the PR with
         the results """
         [repo_owner, repo_name] = self.__repo['full_name'].split('/')
-        with open(os.path.join(self.__path, 'pylint_modules.txt')) as modulefile:
-            paths = [os.path.join(self.__path, module.strip()) for module in modulefile]
+        with open(os.path.join(self.__path, 'pylint_modules.txt'),'r') as modulefile:
+            paths = [os.path.join(self.__path, module.strip()) for module in modulefile.read()]
         gihu = Github(config['auth']['username'],
                       config['auth']['password'])
         gihu.get_user(
