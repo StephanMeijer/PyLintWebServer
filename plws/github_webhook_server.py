@@ -45,7 +45,7 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
                 commit=post_data['pull_request']['head']['sha'],
                 module=self.config['module'])
             handler.clone()
-            self.__pylint_and_comment(
+            handler.__pylint_and_comment(
                 path=handler.getPath(),
                 number=post_data['number'],
                 fullname=post_data['pull_request']['head']['repo']['full_name'])
