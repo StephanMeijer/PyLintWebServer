@@ -15,9 +15,9 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
     Comments on the pull-request with the results."""
 
     def __init__(self, *args, **kwargs):
-        super(GithubWebHookServer, self).__init__(*args, **kwargs)
         with open('config.json') as configfile:
             self.config = json.load(configfile)
+        super(GithubWebHookServer, self).__init__(*args, **kwargs)
 
     def do_POST(self):
         """ Reply to an HTTP POST """
