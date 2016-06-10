@@ -37,21 +37,21 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
             post_data = json.loads(
                 self.rfile.read(
                     int(self.headers['Content-Length'])).decode('utf-8'))
-            if post_data["action"] != "opened":
+            if post_data['action'] != 'opened':
                 # Pull Request is no longer open.
                 # Reply with HTTP 409 Conflict
                 self.send_response(409)
                 self.end_headers()
                 return
             handler = GitHandler(
-                clone_url=post_data["pull_request"]["head"]["repo"]["clone_url"],
-                branch=post_data["pull_request"]["head"]["ref"],
-                commit=post_data["pull_request"]["head"]["sha"])
+                clone_url=post_data['pull_request']['head']['repo']['clone_url'],
+                branch=post_data['pull_request']['head']['ref'],
+                commit=post_data['pull_request']['head']['sha'])
             handler.clone()
             self.__pylint_and_comment(
                 path=handler.getPath(),
-                number=post_data["number"],
-                fullname=post_data["pull_request"]["head"]["repo"]["full_name"])
+                number=post_data['number'],
+                fullname=post_data['pull_request']['head']['repo']['full_name'])
             # Reply 201 Created, we're not using 200 OK
             # because in that case we would have to send the result of
             # processing as a reply.
@@ -59,7 +59,7 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
             self.send_response(201)
             self.end_headers()
         except:
-            print("Something gone wrong")
+            print('Something gone wrong')
             self.send_response(500)
             self.end_headers()
 
@@ -74,7 +74,7 @@ class GithubWebHookServer(BaseHTTPRequestHandler):
             repo_owner).get_repo(
                 repo_name).get_issue(
                     number).create_comment(
-                        "**pylint results:**\n\n```\n{0}\n```".format(
+                        '**pylint results:**\n\n```\n{0}\n```'.format(
                             lint_to_text(path)))
         shutil.rmtree(path, ignore_errors=True)
 
